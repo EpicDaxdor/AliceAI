@@ -40,7 +40,7 @@ def tell_joke():
 
 def get_weather(location):
     try:
-        response = requests.get(f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={API_KEY}&units=metric")
+        response = requests.get(f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={45e2c57f1323f92e4797827cb3dadf70}&units=metric")
         weather_data = response.json()
         if weather_data['cod'] == 200:
             main = weather_data['main']
