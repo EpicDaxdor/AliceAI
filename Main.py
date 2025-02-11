@@ -3,12 +3,14 @@ import pyttsx3
 import webbrowser
 import datetime
 import requests
+import logging
+from time import sleep
 
 # Initialize the recognizer and text-to-speech engine
 recognizer = sr.Recognizer()
 engine = pyttsx3.init()
 
-API_KEY = 'YOUR_API_KEY'  # Replace with your OpenWeatherMap API key
+API_KEY = '45e2c57f1323f92e4797827cb3dadf70'  # Replace with your OpenWeatherMap API key
 
 def speak(text):
     engine.say(text)
@@ -29,18 +31,38 @@ def listen():
             print("Could not request results from Google Speech Recognition service.")
             return None
 
-def tell_joke():
-    try:
-        response = requests.get("https://official-joke-api.appspot.com/random_joke")
-        joke_data = response.json()
-        joke = f"{joke_data['setup']} {joke_data['punchline']}"
-        return joke
-    except Exception as e:
-        return "I couldn't fetch a joke at the moment."
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
+def handle_error(e: Exception) -> None:
+    """Handles errors by logging them."""
+    if isinstance(e, requests.exceptions.HTTPError):
+        logging.error(f"HTTP error occurred: {e}")
+    elif isinstance(e, requests.exceptions.RequestException):
+        logging.error(f"Request error occurred: {e}")
+    elif isinstance(e, ValueError):
+        logging.error(f"JSON decode error: {e}")
+
+def tell_joke(retries: int = 3) -> str:
+    url = "https://official-joke-api.appspot.com/random_joke"
+    
+    for attempt in range(retries):
+        try:
+            response = requests.get(url)
+            response.raise_for_status()  # Check for HTTP errors
+            joke_data = response.json()
+            joke = f"{joke_data['setup']} {joke_data['punchline']}"
+            return f"{joke} 1"  # Adding the number 1 to the joke
+        except Exception as e:
+            handle_error(e)  # Call the modular error handling function
+        
+        sleep(1)  # Wait before retrying
+
+    return "I couldn't fetch a joke at the moment."
 
 def get_weather(location):
     try:
-        response = requests.get(f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={45e2c57f1323f92e4797827cb3dadf70}&units=metric")
+        response = requests.get(f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={API_KEY}&units=metric")
         weather_data = response.json()
         if weather_data['cod'] == 200:
             main = weather_data['main']
