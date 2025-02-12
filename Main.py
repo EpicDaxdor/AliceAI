@@ -10,7 +10,7 @@ from time import sleep
 recognizer = sr.Recognizer()
 engine = pyttsx3.init()
 
-API_KEY = '45e2c57f1323f92e4797827cb3dadf70'  # Added my your OpenWeatherMap API key
+API_KEY = 'api key here'  # Add your OpenWeatherMap API key
 
 def speak(text):
     engine.say(text)
